@@ -13,8 +13,9 @@ Upload the brightspace-console.zip file to it and unzip
 Creating a link to the Console:
 
 In the Navigation and Themes admin tool, create a new Custom link
+Set the URL:
 ```
-URL: https://yoursite.brightspace.com/shared/path-to-console/console.html?ou={OrgUnitId}
+https://yoursite.brightspace.com/shared/path-to-console/console.html?ou={OrgUnitId}
 ```
 Important: you need to use the full URL, a relative path starting with /shared won’t work
 Set it to open in the Same Window
