@@ -5,8 +5,8 @@ See https://github.com/chrisdone/jquery-console for info about the console.
 
 What does it do? Currently only 5 commands are supported:
 * help: displays the other available commands
-* enrollemnt: shows the academic courses a user is enrolled in, with links to the courses
-* impersonnate: initiates an impersnation session of a given user
+* enrollment: shows the academic courses a user is enrolled in, with links to the courses
+* impersonate: initiates an impersonation session of a given user
 * user: shows basic info about a user, JSON format
 * api: lets you run get, put, post, delete commands directly to the Brightspace API, and submit forms if the correct data is provided
 * type each command alone for usage instructions
