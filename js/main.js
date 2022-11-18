@@ -111,12 +111,19 @@ $(document).ready(function () {
                         let data = null;
                         if (method == 'put' || method == 'post' || method == 'submit') {
                             let json = $('#json_input').val();
-                            data = JSON.parse(json);
+                            
+                            try{
+                                data = JSON.parse(json);
+                            }catch(e){
+                                m = 'Error: Invalid JSON';
+                            }
                         }
 
-                        m = "Calling " + method + " " + url + "\n";
-                        m += "See \"JSON Output\" for result. ";
-                        api_call(method, url, data);
+                        if(method == 'get' || data !== null){
+                            m = "Calling " + method + " " + url + "\n";
+                            m += "See \"JSON Output\" for result. ";
+                            api_call(method, url, data);
+                        }
 
                     } else {
                         m = "Usage: api <method> <url>\nUse the \"JSON Input\" field to input data\n";
@@ -292,6 +299,11 @@ async function api_call(method, url, data) {
 
     }
 
-    $('#json_output').val(JSON.stringify(response, null, 2));
+    // stringify json respones
+    if (typeof response == 'object') {
+        response = JSON.stringify(response, null, 2);
+    }
+
+    $('#json_output').val(response);
 
 }
