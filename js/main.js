@@ -253,7 +253,7 @@ async function user_info(identifier) {
 
     if (response[0] !== undefined) {
         response = response[0];
-    } else if (response.Error !== undefined) {
+    } else if (response.UserId === undefined) {
         return false;
     }
 
