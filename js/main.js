@@ -34,13 +34,15 @@ $(document).ready(function () {
 
                 let commandParts = line.split(' ');
 
+                commandParts[0] = commandParts[0].toLowerCase();
+                
                 if (commandParts[0] == "help") {
                     m = "Supported commands: " + user_commands.join(", ");
                 } else if (commandParts[0] == "impersonate") {
                     if (commandParts.length >= 2) {
 
                         let flag = '';
-                        let identifier = commandParts[1];
+                        let identifier = commandParts[1].toLowerCase();
 
                         if (commandParts.length > 2 && commandParts[1] == '-i') {
                             flag = commandParts[1] + ' ';
@@ -58,7 +60,7 @@ $(document).ready(function () {
                     if (commandParts.length >= 2) {
 
                         let flag = '';
-                        let identifier = commandParts[1];
+                        let identifier = commandParts[1].toLowerCase();;
 
                         if (commandParts.length > 2 && commandParts[1] == '-i') {
                             flag = commandParts[1] + ' ';
@@ -76,7 +78,7 @@ $(document).ready(function () {
 
                     if (commandParts.length >= 2) {
                         let flag = '';
-                        let identifier = commandParts[1];
+                        let identifier = commandParts[1].toLowerCase();;
 
                         if (commandParts.length > 2 && commandParts[1] == '-i') {
                             flag = commandParts[1] + ' ';
@@ -106,7 +108,7 @@ $(document).ready(function () {
                 } else if (commandParts[0] == 'api') {
 
                     if (commandParts.length == 3) {
-                        let method = commandParts[1];
+                        let method = commandParts[1].toLowerCase();;
                         let url = commandParts[2];
                         let data = null;
                         if (method == 'put' || method == 'post' || method == 'submit') {
