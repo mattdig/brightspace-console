@@ -64,7 +64,7 @@ class Brightspace{
                     dataString += '--' + boundary + '\r\n';
                     if(typeof item == 'object'){
                         dataString += 'Content-Type: application/json\r\n\r\n' + 
-                                      '{"hi" : "bye"}';//JSON.stringify(item) + '\r\n';
+                                      JSON.stringify(item) + '\r\n';
                     } else if (typeof item == 'string' && item.substring(0, 1) == '<'){
                         dataString += 'Content-Disposition: form-data; name=""; filename="file.htm"\r\nContent-Type: text/html\r\n\r\n' + 
                                       item + '\r\n';
@@ -84,7 +84,7 @@ class Brightspace{
 
             let xhr = new XMLHttpRequest();
             
-            xhr.open(verb, url, true);
+            xhr.open(verb, url);
             
             if(verb !== 'get' && type !== 'form'){
                 xhr.setRequestHeader('X-Csrf-Token', token.referrerToken);
