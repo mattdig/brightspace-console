@@ -9,8 +9,9 @@ class Brightspace{
         }
 
         this.versions = {
-            le : '1.53',
-            lp : '1.42'
+            le : '1.66',
+            lp : '1.42',
+            bas : '1.1'
         };
     }
 
@@ -44,7 +45,7 @@ class Brightspace{
         let dataString = '';
         let token = false;
 
-        let boundary = 'xxBOUNDARYxx';
+        let boundary = '------' + Math.random().toString().substring(2);
 
         if(verb !== 'get'){
             token = await this.getToken();
@@ -110,14 +111,16 @@ class Brightspace{
                         let first = response.indexOf('{');
                         let second = response.indexOf('{', first + 1);
 
-                        if(second > -1){
+                        if(response.indexOf('while(1);') === 0){
+                            response = response.substring(first);
+                        } else if(second > -1){
                             response = response.substring(second); 
                         } else {
                             response = response.substring(first + 2);
                         }
                     }
 
-                    if(response.substring(0, 1) == '{'){
+                    if(response.substring(0, 1) == '{' || response.substring(0, 1) == '['){
                         resolve(JSON.parse(response));
                     } else {
                         resolve(response);
@@ -154,10 +157,12 @@ class Brightspace{
 
     process(url){
             
-        let version = this.versions.le;
+        let version;
 
-        if(url.indexOf('/lp/') > -1){
-            version = this.versions.lp;
+        for (const [key, value] of Object.entries(this.versions)) {
+            if(url.indexOf('/' + key + '/') > -1){
+                version = value;
+            }
         }
 
         url = url.replace('(version)', version);

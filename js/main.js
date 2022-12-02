@@ -54,7 +54,7 @@ $(document).ready(function () {
                         m += "\n" + response;
 
                     } else {
-                        m = "Usage: impersonate <username|email|banner-id>\nor\nimpersonate -i <user-id>";
+                        m = "Usage: impersonate <username|email|banner-id>\nor\nimpersonate -i <user-id>\To cancel: exit";
                     }
                 } else if (commandParts[0] == 'enrollment' || commandParts[0] == 'enrolment') {
                     if (commandParts.length >= 2) {
@@ -132,6 +132,13 @@ $(document).ready(function () {
                         m += ' <<a href="https://docs.valence.desire2learn.com/reference.html">>Brightspace API Reference<</a>>';
                     }
 
+                } else if (commandParts[0] == "exit") {
+                    m = "Ending impersonation...";
+                    let data = {
+                        "isXhr": true,
+                        "requestId": 2
+                    };
+                    let response = await bs.submit('/d2l/lp/impersonation/Restore', data);
                 } else {
                     c = 'jquery-console-message-error';
                 }
