@@ -252,9 +252,12 @@ async function enrol_user(user, role, ou) {
         role = role.toLowerCase();
         
         let roles = await bs.get('/d2l/api/lp/(version)/roles/');
+
+        console.log(roles);
+
         roles.forEach(element => {
-            if(element.Name.toLowerCase() == role){
-                role = element.Id;
+            if(element.DisplayName.toLowerCase() == role){
+                role = parseInt(element.Identifier);
             }
         });
 
