@@ -12,7 +12,7 @@ let CONSOLE;
 
 $(document).ready(function () {
     /* Fifth console */
-    let user_commands = ["impersonate", "enrollment", "user", 'api'];
+    let user_commands = ["impersonate", 'enrol', "enrolment", "user", 'api'];
     user_commands.sort();
     let all_commands = ['help'].concat(user_commands);
     
@@ -56,8 +56,52 @@ $(document).ready(function () {
                     } else {
                         m = "Usage: impersonate <username|email|banner-id>\nor\nimpersonate -i <user-id>\To cancel: exit";
                     }
-                } else if (commandParts[0] == 'enrollment' || commandParts[0] == 'enrolment') {
+                } else if (commandParts[0] == 'enrol' || commandParts[0] == 'enroll') {
                     if (commandParts.length >= 2) {
+
+                        let user = false;
+                        let role = '';
+                        let ou = false;
+
+                        for(let i = 1; i < commandParts.length; i++){
+                            if(commandParts[i] == '-u'){
+                                user = commandParts[++i];
+                            } else if(commandParts[i] == '-r'){
+                                if(commandParts[i+1].slice(0,1) == '"'){
+                                    role = commandParts[++i].slice(1);
+                                    for(let j = i + 1; j < commandParts.length; j++){
+                                        if(commandParts[j].slice(-1) == '"'){
+                                            role += " " + commandParts[j].slice(0,-1);
+                                            i = j;
+                                            break;
+                                        } else {
+                                            role += " " + commandParts[j];
+                                        }
+                                    }
+
+                                    if(j > i){
+                                        role = false;
+                                        m = "Error: Invalid role";
+                                        break;
+                                    }
+                                    role += " " + commandParts[i];
+                                } else {
+                                    role = commandParts[++i];
+                                }
+                            } else if(commandParts[i] == '-o'){
+                                ou = commandParts[++i];
+                            }
+                        }
+                        
+                        let response = await enrol_user(user, role, ou);
+
+                        m = response;
+
+                    } else {
+                        m = "Usage: enrol <username|email|banner-id>\nor\nenrolment -i <user-id>";
+                    }
+                } else if (commandParts[0] == 'enrolment' || commandParts[0] == 'enrollment') {
+                    try {
 
                         let flag = '';
                         let identifier = commandParts[1].toLowerCase();;
@@ -71,8 +115,8 @@ $(document).ready(function () {
 
                         m = response;
 
-                    } else {
-                        m = "Usage: enrollment <username|email|banner-id>\nor\nenrollment -i <user-id>";
+                    } catch (e){
+                        m = "Usage: enrolment -u <username|email|banner-id> -r <role-id|role-name> -o <org-unit-id>";
                     }
                 } else if (commandParts[0] == 'user') {
 
@@ -196,6 +240,44 @@ async function impersonate(identifier) {
     }
 
 }
+
+async function enrol_user(user, role, ou) {
+
+    let userId = await getUserId(user);
+
+    if (!userId)
+        return 'Error: user not found';
+
+    if (typeof role == 'string') {
+        role = role.toLowerCase();
+        
+        let roles = await bs.get('/d2l/api/lp/(version)/roles/');
+        roles.forEach(element => {
+            if(element.Name.toLowerCase() == role){
+                role = element.Id;
+            }
+        });
+
+        if(typeof role == 'string'){
+            return 'Error: role not found';
+        }
+    }
+
+    let Enrollment = {
+        "OrgUnitId": ou,
+        "UserId": userId,
+        "RoleId": role
+    }
+
+    let enrol = bs.post('/d2l/api/lp/(version)/enrollments/', Enrollment);
+
+    if ('OrgUnitId' in enrol) {
+        return 'Success: user enrolled';
+    } else {
+        return 'Error: user not enrolled';
+    }
+}
+
 
 async function enrollment_status(identifier) {
 
