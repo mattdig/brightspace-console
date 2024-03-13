@@ -26,8 +26,6 @@ $(document).ready(function () {
                 // trim line and remove double spaces
                 line = line.trim().replace(/\s+/g, ' ');
 
-                //console.log('"' + line + '"');
-
                 let m = 'Command not recognized';
                 let c = 'jquery-console-message-value';
                 let response;
@@ -60,31 +58,33 @@ $(document).ready(function () {
                     if (commandParts.length >= 2) {
 
                         let user = false;
-                        let role = '';
+                        let role = false;
                         let ou = false;
 
                         for(let i = 1; i < commandParts.length; i++){
                             if(commandParts[i] == '-u'){
                                 user = commandParts[++i];
                             } else if(commandParts[i] == '-r'){
+                                
                                 if(commandParts[i+1].slice(0,1) == '"'){
-                                    role = commandParts[++i].slice(1);
+                                    
+                                    let tempRole = commandParts[++i].slice(1);
+
                                     for(let j = i + 1; j < commandParts.length; j++){
                                         if(commandParts[j].slice(-1) == '"'){
-                                            role += " " + commandParts[j].slice(0,-1);
+                                            role = tempRole + " " + commandParts[j].slice(0,-1);
                                             i = j;
                                             break;
                                         } else {
-                                            role += " " + commandParts[j];
+                                            tempRole += " " + commandParts[j];
                                         }
                                     }
 
-                                    if(j > i){
-                                        role = false;
+                                    if(role == false){
                                         m = "Error: Invalid role";
                                         break;
                                     }
-                                    role += " " + commandParts[i];
+                                    
                                 } else {
                                     role = commandParts[++i];
                                 }
@@ -93,9 +93,10 @@ $(document).ready(function () {
                             }
                         }
                         
-                        let response = await enrol_user(user, role, ou);
-
-                        m = response;
+                        if(user !== false && role !== false && ou !== false){
+                            let response = await enrol_user(user, role, ou);
+                            m = response;
+                        }
 
                     } else {
                         m = "Usage: enrol <username|email|banner-id>\nor\nenrolment -i <user-id>";
@@ -187,8 +188,6 @@ $(document).ready(function () {
                     c = 'jquery-console-message-error';
                 }
 
-                //console.log(m);
-
                 return [{ msg: m, className: c }];
             } else {
                 return [{ msg: '', className: "jquery-console-message-value" }];
@@ -202,6 +201,7 @@ $(document).ready(function () {
                 let command = commands[i];
                 if (command.lastIndexOf(prefix, 0) === 0) {
                     ret.push(command.substring(prefix.length) + ' ');
+                    break;
                 }
             }
             return ret;
@@ -253,8 +253,6 @@ async function enrol_user(user, role, ou) {
         
         let roles = await bs.get('/d2l/api/lp/(version)/roles/');
 
-        console.log(roles);
-
         roles.forEach(element => {
             if(element.DisplayName.toLowerCase() == role){
                 role = parseInt(element.Identifier);
@@ -272,7 +270,7 @@ async function enrol_user(user, role, ou) {
         "RoleId": role
     }
 
-    let enrol = bs.post('/d2l/api/lp/(version)/enrollments/', Enrollment);
+    let enrol = await bs.post('/d2l/api/lp/(version)/enrollments/', Enrollment);
 
     if ('OrgUnitId' in enrol) {
         return 'Success: user enrolled';
