@@ -274,7 +274,7 @@
       // Don't mess with the focus if there is an active selection
       if (window.getSelection().toString()) {
         return false;
-      } else if ($(e.target).is('a')) {
+      } else if ($(e.target).is('a') && $(e.target).attr('href')) {
         // is the target a link? follow the link in a new window
         window.open($(e.target).attr('href'), '_blank').focus();
         return false;

@@ -12,7 +12,7 @@ let CONSOLE;
 
 $(document).ready(function () {
     /* Fifth console */
-    let user_commands = ["impersonate", 'enrol', "enrolment", "user", 'api'];
+    let user_commands = ['api', 'classlist', 'enrol', 'enrolment', 'impersonate', 'user'];
     user_commands.sort();
     let all_commands = ['help'].concat(user_commands);
     
@@ -36,24 +36,54 @@ $(document).ready(function () {
                 
                 if (commandParts[0] == "help") {
                     m = "Supported commands: " + user_commands.join(", ");
-                } else if (commandParts[0] == "impersonate") {
-                    if (commandParts.length >= 2) {
+                } else if (commandParts[0] == 'api') {
 
-                        let flag = '';
-                        let identifier = commandParts[1].toLowerCase();
-
-                        if (commandParts.length > 2 && commandParts[1] == '-i') {
-                            flag = commandParts[1] + ' ';
-                            identifier = commandParts[2];
+                    if (commandParts.length == 3) {
+                        let method = commandParts[1].toLowerCase();;
+                        let url = commandParts[2];
+                        let data = null;
+                        if (method == 'put' || method == 'post' || method == 'submit') {
+                            let json = $('#json_input').val();
+                            
+                            try{
+                                data = JSON.parse(json);
+                            }catch(e){
+                                m = 'Error: Invalid JSON';
+                            }
                         }
 
-                        m = "Impersonnating " + identifier + '... This page will reload if successful.';
-                        response = await impersonate(flag + identifier);
-                        m += "\n" + response;
+                        if(method == 'get' || data !== null){
+                            m = "Calling " + method + " " + url + "\n";
+                            m += "See \"JSON Output\" for result. ";
+                            api_call(method, url, data);
+                        }
 
                     } else {
-                        m = "Usage: impersonate <username|email|banner-id>\nor\nimpersonate -i <user-id>\To cancel: exit";
+                        m = "Usage: api <method> <url>\nUse the \"JSON Input\" field to input data\n";
+                        m += ' <<a href="https://docs.valence.desire2learn.com/reference.html">>Brightspace API Reference<</a>>';
                     }
+
+                } else if (commandParts[0] == 'classlist') {
+
+                    if(commandParts.length == 2){
+                        let ou = parseInt(commandParts[1]);
+                        let response = await bs.get('/d2l/api/le/(version)/' + ou + '/classlist/');
+
+                        if(typeof response == 'object' && !('Error' in response)){
+                            m = '';
+                            for(user of response){
+                                m += '<<a onclick="impersonate(\'-i -x ' + user.Identifier + '\');">>' + 
+                                user.DisplayName + " (" + user.Username + " | " + user.OrgDefinedId + ") " + user.ClasslistRoleDisplayName + 
+                                "<</a>>\n";
+                            }
+                        } else {
+                            m = 'Error: No enrolments found in that course';
+                        }
+
+                    } else {
+                        m = "Usage: classlist <org-unit-id>";
+                    }
+
                 } else if (commandParts[0] == 'enrol' || commandParts[0] == 'enroll') {
                     if (commandParts.length >= 2) {
 
@@ -99,7 +129,7 @@ $(document).ready(function () {
                         }
 
                     } else {
-                        m = "Usage: enrol <username|email|banner-id>\nor\nenrolment -i <user-id>";
+                        m = "Usage: enrol -u <username|email|banner-id> -r <role-id|role-name> -o <org-unit-id>";
                     }
                 } else if (commandParts[0] == 'enrolment' || commandParts[0] == 'enrollment') {
                     try {
@@ -117,7 +147,41 @@ $(document).ready(function () {
                         m = response;
 
                     } catch (e){
-                        m = "Usage: enrolment -u <username|email|banner-id> -r <role-id|role-name> -o <org-unit-id>";
+                        m = "Usage: enrolment <username|email|banner-id> or -i <user-id>";
+                    }
+                } else if (commandParts[0] == "impersonate") {
+
+                    let usage = "Usage: impersonate <username|email|banner-id> or -i <user-id>\To cancel: exit";
+
+                    if (commandParts.length >= 2) {
+
+                        let flags = '';
+                        let identifier;
+
+                        if (commandParts.indexOf('-i') != -1){
+                            flags += '-i ';
+                            commandParts.splice(commandParts.indexOf('-i'), 1);
+                        }
+
+                        if(commandParts.indexOf('-x') != -1){
+                            flags += '-x ';
+                            commandParts.splice(commandParts.indexOf('-x'), 1);
+                        }
+
+                        if(commandParts.length != 2){
+                            m = usage;
+                         
+                        } else {
+
+                            identifier = commandParts[1];
+
+                            response = await impersonate(flags + identifier);
+                            m = response;
+                        
+                        }
+
+                    } else {
+                        m = usage;
                     }
                 } else if (commandParts[0] == 'user') {
 
@@ -150,33 +214,6 @@ $(document).ready(function () {
                     } else {
                         m = "Usage: user <username|email|banner-id>\nor\nuser -i <user-id>";
                     }
-                } else if (commandParts[0] == 'api') {
-
-                    if (commandParts.length == 3) {
-                        let method = commandParts[1].toLowerCase();;
-                        let url = commandParts[2];
-                        let data = null;
-                        if (method == 'put' || method == 'post' || method == 'submit') {
-                            let json = $('#json_input').val();
-                            
-                            try{
-                                data = JSON.parse(json);
-                            }catch(e){
-                                m = 'Error: Invalid JSON';
-                            }
-                        }
-
-                        if(method == 'get' || data !== null){
-                            m = "Calling " + method + " " + url + "\n";
-                            m += "See \"JSON Output\" for result. ";
-                            api_call(method, url, data);
-                        }
-
-                    } else {
-                        m = "Usage: api <method> <url>\nUse the \"JSON Input\" field to input data\n";
-                        m += ' <<a href="https://docs.valence.desire2learn.com/reference.html">>Brightspace API Reference<</a>>';
-                    }
-
                 } else if (commandParts[0] == "exit") {
                     m = "Ending impersonation...";
                     let data = {
@@ -216,7 +253,15 @@ $(document).ready(function () {
 
 async function impersonate(identifier) {
 
-    let userId = await getUserId(identifier);
+    let openNewTab = true;
+    if (identifier.indexOf('-x') != -1) {
+        openNewTab = false;
+        identifier = identifier.replace('-x', '').trim().replace(/\s+/g, ' ');
+    }
+
+    let user = await user_info(identifier);
+
+    userId = user.UserId;
 
     if (!userId) {
         return "Error: User not found";
@@ -233,8 +278,17 @@ async function impersonate(identifier) {
     let response = await bs.submit(url, data);
 
     if (response && response.Result !== undefined && (response.Result === null || response.Result[0] == "success")) {
-        window.open("/d2l/home/" + (WORKING_OU || ''), '_blank').focus();
-        return "Success! Reloading page...";
+
+        CONSOLE.report([{msg:"\n\nNow impersonating " + user.UserName + "...\n\n", className:"jquery-console-message-value"}]);
+
+        if(openNewTab){
+            window.open("/d2l/home/" + (WORKING_OU || ''), '_blank').focus();
+            return "Success! Opening new page...";
+        } else {
+            
+            return "Success!";
+        }
+    
     } else {
         return 'Error: impersonnation failed';
     }
