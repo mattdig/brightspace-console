@@ -73,7 +73,7 @@ $(document).ready(function () {
                             m = '';
                             for(user of response){
                                 m += '<<a onclick="impersonate(\'-i -x ' + user.Identifier + '\');">>' + 
-                                user.DisplayName + " (" + user.Username + " | " + user.OrgDefinedId + ") " + user.ClasslistRoleDisplayName + 
+                                user.DisplayName + " | " + user.OrgDefinedId + " | " + user.ClasslistRoleDisplayName + 
                                 "<</a>>\n";
                             }
                         } else {
