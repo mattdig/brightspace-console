@@ -12,7 +12,7 @@ let CONSOLE;
 
 $(document).ready(function () {
     /* Fifth console */
-    let user_commands = ['api', 'classlist', 'enrol', 'enrolment', 'impersonate', 'user'];
+    let user_commands = ['api', 'classlist', 'enrol', 'enrolment', 'impersonate', 'user', 'versions', 'whoami'];
     user_commands.sort();
     let all_commands = ['help'].concat(user_commands);
     
@@ -214,6 +214,19 @@ $(document).ready(function () {
                     } else {
                         m = "Usage: user <username|email|banner-id>\nor\nuser -i <user-id>";
                     }
+                } else if (commandParts[0] == "versions") {
+                    let response = await bs.get('/d2l/api/versions/');
+                    m = "Current Versions:\n";
+                    for(const [key, value] of Object.entries(bs.versions)){
+                        m += key + " : " + value + "\n";
+                    }
+                    m += "\nLatest API Versions:\n";
+                    for(const api of response){
+                        m += api.ProductCode + " : " + api.LatestVersion + "\n";
+                    }
+                } else if (commandParts[0] == "whoami") {
+                    let response = await bs.get('/d2l/api/lp/(version)/users/whoami');
+                    m = JSON.stringify(response, null, 2);
                 } else if (commandParts[0] == "exit") {
                     m = "Ending impersonation...";
                     let data = {
