@@ -43,16 +43,10 @@ $(document).ready(function () {
                         let url = commandParts[2];
                         let data = null;
                         if (method == 'put' || method == 'post' || method == 'submit') {
-                            let json = $('#json_input').val();
-                            
-                            try{
-                                data = JSON.parse(json);
-                            }catch(e){
-                                m = 'Error: Invalid JSON';
-                            }
+                            data = $('#json_input').val().trim();
                         }
 
-                        if(method == 'get' || data !== null){
+                        if(method == 'get' || method == 'delete' || data !== null){
                             m = "Calling " + method + " " + url + "\n";
                             m += "See \"JSON Output\" for result. ";
                             api_call(method, url, data);
