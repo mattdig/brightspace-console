@@ -7,6 +7,7 @@ What does it do? Currently only 5 commands are supported:
 * help: displays the other available commands
 * enrolment: shows the academic courses a user is enrolled in, with links to the courses
 * impersonate: initiates an impersonation session of a given user
+* exit: end an impersonation session
 * user: shows basic info about a user, JSON format
 * api: lets you run get, put, post, delete commands directly to the Brightspace API, and submit forms if the correct data is provided
 * classlist: shows a classlist for an org unit, and each user can be clicked on to impersonnate them
