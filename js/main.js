@@ -12,7 +12,7 @@ let CONSOLE;
 
 $(document).ready(function () {
     /* Fifth console */
-    let user_commands = ['api', 'classlist', 'enrol', 'enrolment', 'impersonate', 'user', 'versions', 'whoami'];
+    let user_commands = ['api', 'classlist', 'enrol', 'enrolment', 'impersonate', 'unenrol', 'user', 'versions', 'whoami'];
     user_commands.sort();
     let all_commands = ['help'].concat(user_commands);
     
@@ -177,6 +177,31 @@ $(document).ready(function () {
                     } else {
                         m = usage;
                     }
+                } else if (commandParts[0] == 'unenrol' || commandParts[0] == 'unenroll') {
+                    if (commandParts.length == 5) {
+
+                        let user = 0;
+                        let ou = 0;
+
+                        if(commandParts[1] == '-u' && commandParts[3] == '-o'){
+                            user = commandParts[2];
+                            ou = commandParts[4];
+                        } else if(commandParts[1] == '-o' && commandParts[3] == '-u'){
+                            ou = commandParts[2];
+                            user = commandParts[4];
+                        } else {
+                            m = "Usage: unenrol -u <username|email|banner-id> -o <org-unit-id>";
+                        }
+
+                        if(user !== 0 && ou !== 0){
+                            let response = await unenrol_user(user, ou);
+                            m = response;
+                        }
+
+                    } else {
+                        m = "Usage: unenrol -u <username|email|banner-id> -o <org-unit-id>";
+                    }
+                
                 } else if (commandParts[0] == 'user') {
 
                     if (commandParts.length >= 2) {
@@ -340,6 +365,21 @@ async function enrol_user(user, role, ou) {
     }
 }
 
+async function unenrol_user(user, ou) {
+
+    let userId = await getUserId(user);
+
+    if (!userId)
+        return 'Error: user not found';
+
+    let unenrol = await bs.delete('/d2l/api/lp/(version)/enrollments/orgUnits/' + ou + '/users/' + userId);
+
+    if ('OrgUnitId' in unenrol) {
+        return 'Success: user unenrolled';
+    } else {
+        return 'Error: user not unenrolled';
+    }
+}
 
 async function enrollment_status(identifier) {
 
